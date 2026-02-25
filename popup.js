@@ -2,17 +2,26 @@ const DEFAULT_SETTINGS = {
   dedup: true,
   matchMode: "exact",
   githubSplit: true,
+  githubSplitDiff: false,
 };
 
 const dedupEl = document.getElementById("dedup");
 const matchModeEl = document.getElementById("matchMode");
 const githubSplitEl = document.getElementById("githubSplit");
+const githubSplitDiffEl = document.getElementById("githubSplitDiff");
+const splitDiffSettingEl = document.getElementById("splitDiffSetting");
+
+function updateSplitDiffVisibility() {
+  splitDiffSettingEl.classList.toggle("hidden", !githubSplitEl.checked);
+}
 
 // Load settings
 chrome.storage.local.get(DEFAULT_SETTINGS, (settings) => {
   dedupEl.checked = settings.dedup;
   matchModeEl.value = settings.matchMode;
   githubSplitEl.checked = settings.githubSplit;
+  githubSplitDiffEl.checked = settings.githubSplitDiff;
+  updateSplitDiffVisibility();
 });
 
 // Save on change
@@ -26,6 +35,11 @@ matchModeEl.addEventListener("change", () => {
 
 githubSplitEl.addEventListener("change", () => {
   chrome.storage.local.set({ githubSplit: githubSplitEl.checked });
+  updateSplitDiffVisibility();
+});
+
+githubSplitDiffEl.addEventListener("change", () => {
+  chrome.storage.local.set({ githubSplitDiff: githubSplitDiffEl.checked });
 });
 
 // Deduplicate all existing tabs

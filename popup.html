@@ -78,6 +78,13 @@
       transform: translateX(20px);
     }
 
+    .sub-setting {
+      padding-left: 16px;
+    }
+    .sub-setting.hidden {
+      display: none;
+    }
+
     .select-input {
       padding: 4px 8px;
       border: 1px solid #d0d0d0;
@@ -176,6 +183,17 @@
     </div>
     <label class="toggle">
       <input type="checkbox" id="githubSplit">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="setting sub-setting" id="splitDiffSetting">
+    <div class="setting-label">
+      <span>分割ビューで開く</span>
+      <small>Filesタブを Split diff で表示</small>
+    </div>
+    <label class="toggle">
+      <input type="checkbox" id="githubSplitDiff">
       <span class="slider"></span>
     </label>
   </div>
