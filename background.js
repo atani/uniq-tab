@@ -4,6 +4,7 @@ const DEFAULT_SETTINGS = {
   dedup: true,
   matchMode: "exact", // "exact" = hash含む完全マッチ, "partial" = hash無視の部分一致
   githubSplit: true,
+  githubSplitDiff: false, // Filesタブを分割ビュー (?diff=split) で開く
   githubHosts: ["github.com"],
 };
 
@@ -81,6 +82,7 @@ function parseGitHubPRUrl(url, hosts) {
       repo: match[2],
       number: match[3],
       filesUrl: `${u.origin}/${match[1]}/${match[2]}/pull/${match[3]}/files`,
+      filesSplitUrl: `${u.origin}/${match[1]}/${match[2]}/pull/${match[3]}/files?diff=split`,
     };
   } catch {
     return null;
@@ -102,17 +104,18 @@ async function handleGitHubPRSplit(tabId, url, tab) {
   const prKey = `${pr.host}/${pr.owner}/${pr.repo}/pull/${pr.number}`;
   if (splitPRs.has(prKey)) return;
 
-  // Check if files tab is already open
+  // Check if files tab is already open (compare by path, ignoring query params and hash)
   const allTabs = await chrome.tabs.query({});
-  const filesNormalized = normalizeUrl(pr.filesUrl, { stripHash: true });
-  const alreadyOpen = allTabs.some(
-    (t) => normalizeUrl(t.url, { stripHash: true }) === filesNormalized
-  );
+  const filesPath = new URL(pr.filesUrl).pathname;
+  const alreadyOpen = allTabs.some((t) => {
+    try { return new URL(t.url).pathname === filesPath; } catch { return false; }
+  });
   if (alreadyOpen) return;
 
   // Open files tab next to the current tab (inactive)
+  const openUrl = settings.githubSplitDiff ? pr.filesSplitUrl : pr.filesUrl;
   const newTab = await chrome.tabs.create({
-    url: pr.filesUrl,
+    url: openUrl,
     index: tab.index + 1,
     active: false,
   });
