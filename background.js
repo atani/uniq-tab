@@ -122,6 +122,46 @@ async function handleGitHubPRSplit(tabId, url, tab) {
   setTimeout(() => splitPRs.delete(prKey), 5000);
 }
 
+// ===== Deduplicate All Existing Tabs =====
+
+async function deduplicateAllTabs() {
+  const allTabs = await chrome.tabs.query({});
+  const seen = new Map(); // normalizedUrl -> tab (keep the most recently accessed)
+  const toClose = [];
+
+  for (const tab of allTabs) {
+    if (isInternalUrl(tab.url)) continue;
+    const normalized = normalizeUrl(tab.url);
+
+    const existing = seen.get(normalized);
+    if (existing) {
+      // Keep the one that was more recently accessed (higher lastAccessed or active)
+      if (tab.active || (!existing.active && tab.lastAccessed > existing.lastAccessed)) {
+        toClose.push(existing.id);
+        seen.set(normalized, tab);
+      } else {
+        toClose.push(tab.id);
+      }
+    } else {
+      seen.set(normalized, tab);
+    }
+  }
+
+  if (toClose.length > 0) {
+    await chrome.tabs.remove(toClose);
+  }
+  return { closed: toClose.length };
+}
+
+// ===== Message Handler =====
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.action === "deduplicateAll") {
+    deduplicateAllTabs().then(sendResponse);
+    return true; // async response
+  }
+});
+
 // ===== Event Listeners =====
 
 // Track recently created tabs for smarter dedup
