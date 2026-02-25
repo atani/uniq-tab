@@ -78,6 +78,46 @@
       transform: translateX(20px);
     }
 
+    .actions {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #e0e0e0;
+    }
+    .actions h2 {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .action-btn {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      background: #fff;
+      font-size: 13px;
+      cursor: pointer;
+      color: #1a1a1a;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .action-btn:hover {
+      background: #f5f5f5;
+      border-color: #bbb;
+    }
+    .action-btn:active {
+      background: #e8e8e8;
+    }
+    .action-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .action-result {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #666;
+      min-height: 16px;
+    }
+
     .footer {
       margin-top: 12px;
       padding-top: 10px;
@@ -117,6 +157,12 @@
       <input type="checkbox" id="githubSplit">
       <span class="slider"></span>
     </label>
+  </div>
+
+  <div class="actions">
+    <h2>タブの整理</h2>
+    <button class="action-btn" id="dedupAll">重複タブをまとめる</button>
+    <div class="action-result" id="dedupResult"></div>
   </div>
 
   <div class="footer">
