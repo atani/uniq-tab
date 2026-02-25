@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "uniq-tab",
+  "version": "0.1.0",
+  "description": "Prevent duplicate tabs & auto-split GitHub PR pages",
+  "permissions": ["tabs", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
