@@ -78,6 +78,16 @@
       transform: translateX(20px);
     }
 
+    .select-input {
+      padding: 4px 8px;
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #1a1a1a;
+      background: #fff;
+      flex-shrink: 0;
+    }
+
     .actions {
       margin-top: 12px;
       padding-top: 10px;
@@ -146,6 +156,17 @@
       <input type="checkbox" id="dedup">
       <span class="slider"></span>
     </label>
+  </div>
+
+  <div class="setting">
+    <div class="setting-label">
+      <span>URLの比較方法</span>
+      <small>部分一致: ハッシュ (#...) の違いを無視</small>
+    </div>
+    <select id="matchMode" class="select-input">
+      <option value="exact">完全マッチ</option>
+      <option value="partial">部分一致</option>
+    </select>
   </div>
 
   <div class="setting">

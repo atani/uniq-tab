@@ -2,6 +2,7 @@
 
 const DEFAULT_SETTINGS = {
   dedup: true,
+  matchMode: "exact", // "exact" = hash含む完全マッチ, "partial" = hash無視の部分一致
   githubSplit: true,
   githubHosts: ["github.com"],
 };
@@ -13,10 +14,10 @@ async function getSettings() {
 
 // ===== URL Utilities =====
 
-function normalizeUrl(url) {
+function normalizeUrl(url, { stripHash = false } = {}) {
   try {
     const u = new URL(url);
-    u.hash = "";
+    if (stripHash) u.hash = "";
     return u.toString().replace(/\/$/, "");
   } catch {
     return url;
@@ -40,10 +41,11 @@ async function handleDuplicateTab(tabId, url) {
   if (!settings.dedup) return;
   if (isInternalUrl(url)) return;
 
-  const normalized = normalizeUrl(url);
+  const stripHash = settings.matchMode === "partial";
+  const normalized = normalizeUrl(url, { stripHash });
   const allTabs = await chrome.tabs.query({});
   const existing = allTabs.find(
-    (t) => t.id !== tabId && normalizeUrl(t.url) === normalized
+    (t) => t.id !== tabId && normalizeUrl(t.url, { stripHash }) === normalized
   );
 
   if (existing) {
@@ -102,9 +104,9 @@ async function handleGitHubPRSplit(tabId, url, tab) {
 
   // Check if files tab is already open
   const allTabs = await chrome.tabs.query({});
-  const filesNormalized = normalizeUrl(pr.filesUrl);
+  const filesNormalized = normalizeUrl(pr.filesUrl, { stripHash: true });
   const alreadyOpen = allTabs.some(
-    (t) => normalizeUrl(t.url) === filesNormalized
+    (t) => normalizeUrl(t.url, { stripHash: true }) === filesNormalized
   );
   if (alreadyOpen) return;
 
@@ -125,13 +127,15 @@ async function handleGitHubPRSplit(tabId, url, tab) {
 // ===== Deduplicate All Existing Tabs =====
 
 async function deduplicateAllTabs() {
+  const settings = await getSettings();
+  const stripHash = settings.matchMode === "partial";
   const allTabs = await chrome.tabs.query({});
   const seen = new Map(); // normalizedUrl -> tab (keep the most recently accessed)
   const toClose = [];
 
   for (const tab of allTabs) {
     if (isInternalUrl(tab.url)) continue;
-    const normalized = normalizeUrl(tab.url);
+    const normalized = normalizeUrl(tab.url, { stripHash });
 
     const existing = seen.get(normalized);
     if (existing) {
